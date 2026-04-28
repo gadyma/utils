@@ -1,0 +1,1 @@
+for d in */; do if [ -d "$d/.git" ]; then echo "--- 📂 Status for: $d ---"; (cd "$d" && git status); echo; fi; done
