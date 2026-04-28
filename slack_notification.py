@@ -11,7 +11,7 @@ sys.path.append(config_dir)
 from config import WEBHOOK_URL
 
 # Your unique Slack Webhook URL
-#webhook_url = WEBHOOK_URL # "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
+#webhook_url = WEBHOOK_URL # "https://hooks.slack.com/services/T..........."
     
 
 def send_slack_notification(message: str):
