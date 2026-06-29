@@ -1,70 +1,60 @@
 #!/usr/bin/env python3
+import sys
+import argparse
 from urllib.parse import quote
 
-# Default country code (change this for your region)
+# Default country code
 DEFAULT_COUNTRY_CODE = "972"
 
 def create_whatsapp_link(phone: str, message: str, default_country_code: str = DEFAULT_COUNTRY_CODE) -> str:
-    """
-    Create a WhatsApp Web link with URL-encoded message.
+    encoded_message = quote(message)
+
+    # Handle "No Number" mode
+    if not phone or phone.strip() == "":
+        return f"https://wa.me/send?text={encoded_message}"
     
-    Args:
-        phone: Phone number (e.g., 050-1234567 or 972501234567)
-        message: Message text, can include newlines
-        default_country_code: Country code to use if phone doesn't have one (default: 972)
-    
-    Returns:
-        Complete WhatsApp Web URL
-    """
-    # Remove any + or - characters from phone number
+    # Clean phone number
     clean_phone = phone.replace('+', '').replace('-', '').replace(' ', '')
     
-    # Check if phone starts with country code
+    # Add country code logic
     if not clean_phone.startswith(default_country_code):
-        # Remove leading 0 if present
         if clean_phone.startswith('0'):
             clean_phone = clean_phone[1:]
-        # Add country code
         clean_phone = default_country_code + clean_phone
     
-    # URL encode the message
-    encoded_message = quote(message)
-    
-    # Build the WhatsApp URL
-    url = f"https://wa.me/{clean_phone}?text={encoded_message}"
-    
-    return url
-
+    return f"https://wa.me/{clean_phone}?text={encoded_message}"
 
 def main():
-    print("WhatsApp Link Generator")
-    print("-" * 40)
+    parser = argparse.ArgumentParser(description="Generate WhatsApp links via parameters or interactive mode.")
+    parser.add_argument("-p", "--phone", help="Phone number (optional)", default=None)
+    parser.add_argument("-m", "--message", help="Message text (optional)", default=None)
     
-    # Get phone number
-    phone = input("Enter phone number (e.g., 050-1234567 or 972501234567): ").strip()
-    
-    # Get message (supports multiline input)
-    print("Enter message (press Ctrl+D or Ctrl+Z when done):")
-    print("(You can include newlines by pressing Enter)")
-    
-    lines = []
-    try:
-        while True:
-            line = input()
-            lines.append(line)
-    except EOFError:
-        pass
-    
-    message = '\n'.join(lines)
-    
-    # Generate link
+    args = parser.parse_args()
+
+    # If parameters are provided via CLI
+    if args.message is not None:
+        phone = args.phone if args.phone else ""
+        message = args.message
+    else:
+        # Fallback to Interactive TUI
+        print("WhatsApp Link Generator (Interactive Mode)")
+        print("-" * 40)
+        phone = input("Enter phone (leave blank for no-number link): ").strip()
+        print("Enter message (Ctrl+D/Ctrl+Z to finish):")
+        lines = []
+        try:
+            while True:
+                lines.append(input())
+        except EOFError:
+            message = '\n'.join(lines)
+
+    if not message.strip():
+        print("Error: Message is empty.")
+        sys.exit(1)
+
     url = create_whatsapp_link(phone, message)
     
-    print("\n" + "=" * 40)
-    print("Your WhatsApp link:")
-    print(url)
-    print("=" * 40)
-
+    print(f"\n{url}")
 
 if __name__ == "__main__":
     main()
